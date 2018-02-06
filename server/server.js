@@ -1,7 +1,9 @@
 //require("./config/config");
 // const _ = require("lodash");
-const express = require("express");
 const path = require("path");
+const http = require("http");
+const express = require("express");
+const socketIO = require("socket.io");
 // const bodyParser = require("body-parser");
 // const {ObjectID} = require("mongodb");
 
@@ -14,10 +16,17 @@ const publicPath = path.join(__dirname, "../public");
 const port = process.env.PORT || 3335;
 
 var app = express();
+var server = http.createServer(app);
+var io = socketIO(server);  // will ceate socket entry points and gives access to the socket JS library:
+// - /socket.io/socket.io.js
 // app.use(bodyParser.json());
 app.use(express.static(publicPath));
 
-app.listen(port, () => {
+io.on("connection", socket => {
+  console.log("new user connected.");
+});
+
+server.listen(port, () => {
   console.log(`Started on port ${port}`);
 })
 
