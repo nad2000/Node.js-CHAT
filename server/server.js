@@ -24,6 +24,8 @@ app.use(express.static(publicPath));
 
 io.on("connection", socket => {
   console.log("new user connected.");
+
+  socket.on("disconnect", () => console.info("Client disconnected..."));
 });
 
 server.listen(port, () => {
