@@ -24,10 +24,21 @@ app.use(express.static(publicPath));
 
 io.on("connection", socket => {
   console.log("new user connected.");
+  socket.emit("newMessage", {from: "Admin", text: "Welcome to the chat app!"});
+  socket.broadcast.emit("newMessage", {  // emits the event to all but the current socket...
+    from: "Admin",
+    text: "New user has connected",
+    createdAt: new Date().getTime()
+  });
 
   socket.on("createMessage", msg => {
     console.info("createMessage:", msg);
-    io.emit("newMessage", {
+    // io.emit("newMessage", {
+    //   from: msg.from,
+    //   text: msg.text,
+    //   createdAt: new Date().getTime()
+    // });
+    socket.broadcast.emit("newMessage", {  // emits the event to all but the current socket...
       from: msg.from,
       text: msg.text,
       createdAt: new Date().getTime()
