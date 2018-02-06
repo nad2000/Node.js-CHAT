@@ -31,6 +31,8 @@ io.on("connection", socket => {
     createdAt: 123
   });
 
+  socket.on("createEmail", newEmail => console.info("createEmail:", newEmail));
+
   socket.on("disconnect", () => console.info("Client disconnected..."));
 });
 
