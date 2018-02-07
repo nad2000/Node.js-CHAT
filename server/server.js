@@ -34,10 +34,11 @@ io.on("connection", socket => {
   // emits the event to all but the current socket...
   socket.broadcast.emit("newMessage", generateMessage("Admin", "New user has connected"));
 
-  socket.on("createMessage", msg => {
+  socket.on("createMessage", (msg, callback) => {
     console.info("createMessage:", msg);
     // emits the event to all but the current socket...
     socket.broadcast.emit("newMessage", generateMessage(msg.from, msg.text));
+    callback("THIS IS FROM THE SERVER");
   });
 
   socket.on("disconnect", () => console.info("Client disconnected..."));
