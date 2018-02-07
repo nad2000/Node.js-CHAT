@@ -11,38 +11,33 @@ const socketIO = require("socket.io");
 // const {User} = require("./models/user");
 // const {Todo} = require("./models/todo");
 // const {authenticate} = require("./middleware/authenticate");
+const {
+  generateMessage
+} = require("./utils/message");
 
 const publicPath = path.join(__dirname, "../public");
 const port = process.env.PORT || 3335;
 
 var app = express();
 var server = http.createServer(app);
-var io = socketIO(server);  // will ceate socket entry points and gives access to the socket JS library:
+var io = socketIO(server); // will ceate socket entry points and gives access to the socket JS library:
 // - /socket.io/socket.io.js
 // app.use(bodyParser.json());
 app.use(express.static(publicPath));
 
 io.on("connection", socket => {
   console.log("new user connected.");
-  socket.emit("newMessage", {from: "Admin", text: "Welcome to the chat app!"});
-  socket.broadcast.emit("newMessage", {  // emits the event to all but the current socket...
+  socket.emit("newMessage", {
     from: "Admin",
-    text: "New user has connected",
-    createdAt: new Date().getTime()
+    text: "Welcome to the chat app!"
   });
+  // emits the event to all but the current socket...
+  socket.broadcast.emit("newMessage", generateMessage("Admin", "New user has connected"));
 
   socket.on("createMessage", msg => {
     console.info("createMessage:", msg);
-    // io.emit("newMessage", {
-    //   from: msg.from,
-    //   text: msg.text,
-    //   createdAt: new Date().getTime()
-    // });
-    socket.broadcast.emit("newMessage", {  // emits the event to all but the current socket...
-      from: msg.from,
-      text: msg.text,
-      createdAt: new Date().getTime()
-    });
+    // emits the event to all but the current socket...
+    socket.broadcast.emit("newMessage", generateMessage(msg.from, msg.text));
   });
 
   socket.on("disconnect", () => console.info("Client disconnected..."));
