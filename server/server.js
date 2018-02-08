@@ -11,9 +11,7 @@ const socketIO = require("socket.io");
 // const {User} = require("./models/user");
 // const {Todo} = require("./models/todo");
 // const {authenticate} = require("./middleware/authenticate");
-const {
-  generateMessage
-} = require("./utils/message");
+const {generateMessage, generateLocationMessage} = require("./utils/message");
 
 const publicPath = path.join(__dirname, "../public");
 const port = process.env.PORT || 3335;
@@ -38,6 +36,15 @@ io.on("connection", socket => {
     console.info("createMessage:", msg);
     // emits the event to all but the current socket...
     socket.broadcast.emit("newMessage", generateMessage(msg.from, msg.text));
+    callback("THIS IS FROM THE SERVER");
+  });
+
+  socket.on("createLocationMessage", (coords, callback) => {
+    console.info("createLocationMessage:", coords);
+    // emits the event to all but the current socket...
+    socket.broadcast.emit(
+      "newLocationMessage",
+      generateLocationMessage("Admin", coords.latitude, coords.longitude));
     callback("THIS IS FROM THE SERVER");
   });
 
