@@ -4,6 +4,7 @@ const path = require("path");
 const http = require("http");
 const express = require("express");
 const socketIO = require("socket.io");
+const moment = require("moment");
 // const bodyParser = require("body-parser");
 // const {ObjectID} = require("mongodb");
 
@@ -25,24 +26,23 @@ app.use(express.static(publicPath));
 
 io.on("connection", socket => {
   console.log("new user connected.");
-  socket.emit("newMessage", {
-    from: "Admin",
-    text: "Welcome to the chat app!"
-  });
+  socket.emit("newMessage", generateMessage("Admin", "Welcome to the chat app!"));
   // emits the event to all but the current socket...
   socket.broadcast.emit("newMessage", generateMessage("Admin", "New user has connected"));
 
   socket.on("createMessage", (msg, callback) => {
     console.info("createMessage:", msg);
     // emits the event to all but the current socket...
-    socket.broadcast.emit("newMessage", generateMessage(msg.from, msg.text));
+    // socket.broadcast.emit("newMessage", generateMessage(msg.from, msg.text));
+    io.emit("newMessage", generateMessage(msg.from, msg.text));
     callback("THIS IS FROM THE SERVER");
   });
 
   socket.on("createLocationMessage", (coords, callback) => {
     console.info("createLocationMessage:", coords);
     // emits the event to all but the current socket...
-    socket.broadcast.emit(
+    // socket.broadcast.emit(
+    io.emit(
       "newLocationMessage",
       generateLocationMessage("Admin", coords.latitude, coords.longitude));
     callback("THIS IS FROM THE SERVER");
