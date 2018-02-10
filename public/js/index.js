@@ -8,13 +8,13 @@ socket.on("disconnect", function() {
   console.log("Disconnected from the server");
 });
 
-socket.on("newMessage", function(msg) {
-  console.log("New Message:", msg);
+function appendMsg(msg) {
   var li = jQuery("<li></li>");
   li.text(`${msg.from}: ${msg.text}`);
-
   jQuery("#messages").append(li);
-});
+}
+
+socket.on("newMessage", appendMsg);
 
 socket.on("newLocationMessage", function(msg) {
   console.log("New Message:", msg);
@@ -29,11 +29,14 @@ socket.on("newLocationMessage", function(msg) {
 
 jQuery("#message-form").on("submit", function(e) {
   e.preventDefault();
-  socket.emit("createMessage", {
+  var msgTextbox = jQuery("[name=message]");
+  var msg = {
     from: "User",
-    text: jQuery("[name=message]").val()
-  }, function(data) {
-    console.log("Got it", data);
+    text: msgTextbox.val()
+  }
+  appendMsg(msg);
+  socket.emit("createMessage", msg, function(data) {
+    msgTextbox.val("");
   });
 });
 
