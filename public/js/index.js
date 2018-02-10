@@ -13,23 +13,14 @@ function fTime(msg) {
 }
 
 function appendMsg(msg) {
-  var li = jQuery("<li></li>");
-  li.text(`${msg.from} ${fTime(msg)}: ${msg.text}`);
-  jQuery("#messages").append(li);
+  msg.formattedTime = fTime(msg);
+  var template = jQuery("#message-template").html();
+  var html = Mustache.render(template, msg);
+  jQuery("#messages").append(html);
 }
 
 socket.on("newMessage", appendMsg);
-
-socket.on("newLocationMessage", function(msg) {
-  console.log("New Message:", msg);
-  var li = jQuery("<li></li>");
-  var a = jQuery('<a target="_blank">My current location</a>');
-  li.text(`${msg.from} ${fTime(msg)}: `);
-  a.attr("href", msg.url);
-  li.append(a);
-
-  jQuery("#messages").append(li);
-});
+socket.on("newLocationMessage", appendMsg);
 
 jQuery("#message-form").on("submit", function(e) {
   e.preventDefault();
