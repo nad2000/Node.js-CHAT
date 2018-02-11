@@ -5,14 +5,8 @@ const http = require("http");
 const express = require("express");
 const socketIO = require("socket.io");
 const moment = require("moment");
-// const bodyParser = require("body-parser");
-// const {ObjectID} = require("mongodb");
-
-// const {mangoose} = require("./db/mongoose");
-// const {User} = require("./models/user");
-// const {Todo} = require("./models/todo");
-// const {authenticate} = require("./middleware/authenticate");
 const {generateMessage, generateLocationMessage} = require("./utils/message");
+const {isRealString} = require("./utils/validation.js");
 
 const publicPath = path.join(__dirname, "../public");
 const port = process.env.PORT || 3335;
@@ -25,10 +19,21 @@ var io = socketIO(server); // will ceate socket entry points and gives access to
 app.use(express.static(publicPath));
 
 io.on("connection", socket => {
-  console.log("new user connected.");
-  socket.emit("newMessage", generateMessage("Admin", "Welcome to the chat app!"));
-  // emits the event to all but the current socket...
-  socket.broadcast.emit("newMessage", generateMessage("Admin", "New user has connected"));
+
+  socket.on("join", (params, callback) => {
+    if (!isRealString(params.name) || !isRealString(params.room)) {
+      callback("Name and room name are required.");
+    }
+    socket.join(params.room);
+    // socket.leave(params.room);
+    // methods with the channels:
+    // io.emit -> io.to(...).emit
+    // socket.broadcast.emit -> socket.broadcast.to(...)emit
+    // socket.emit
+    socket.emit("newMessage", generateMessage("Admin", "Welcome to the chat app!"));
+    socket.broadcast.to(params.room).emit("newMessage", generateMessage("Admin", `${params.name} has connected`));
+    callback();
+  });
 
   socket.on("createMessage", (msg, callback) => {
     console.info("createMessage:", msg);
