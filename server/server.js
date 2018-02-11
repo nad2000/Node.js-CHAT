@@ -5,9 +5,16 @@ const http = require("http");
 const express = require("express");
 const socketIO = require("socket.io");
 const moment = require("moment");
-const {generateMessage, generateLocationMessage} = require("./utils/message");
-const {isRealString} = require("./utils/validation");
-const {Users} = require("./utils/users");
+const {
+  generateMessage,
+  generateLocationMessage
+} = require("./utils/message");
+const {
+  isRealString
+} = require("./utils/validation");
+const {
+  Users
+} = require("./utils/users");
 
 const publicPath = path.join(__dirname, "../public");
 const port = process.env.PORT || 3335;
@@ -40,21 +47,22 @@ io.on("connection", socket => {
   });
 
   socket.on("createMessage", (msg, callback) => {
-    console.info("createMessage:", msg);
-    // emits the event to all but the current socket...
-    // socket.broadcast.emit("newMessage", generateMessage(msg.from, msg.text));
-    io.emit("newMessage", generateMessage(msg.from, msg.text));
-    callback("THIS IS FROM THE SERVER");
+    var user = users.getUser(socket.id);
+    if (user && isRealString(msg.text)) {
+      io.to(user.room).emit("newMessage", generateMessage(user.name, msg.text));
+      callback();
+    }
+
   });
 
   socket.on("createLocationMessage", (coords, callback) => {
-    console.info("createLocationMessage:", coords);
-    // emits the event to all but the current socket...
-    // socket.broadcast.emit(
-    io.emit(
-      "newLocationMessage",
-      generateLocationMessage("Admin", coords.latitude, coords.longitude));
-    callback("THIS IS FROM THE SERVER");
+    var user = users.getUser(socket.id);
+    if (user) {
+      io.to(user.room).emit(
+        "newLocationMessage",
+        generateLocationMessage(user.name, coords.latitude, coords.longitude));
+      callback("THIS IS FROM THE SERVER");
+    }
   });
 
   socket.on("disconnect", () => {
